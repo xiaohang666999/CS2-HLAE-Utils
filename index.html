@@ -65,7 +65,7 @@
     .text-button { padding:3px 0; border:0; color:var(--text); background:transparent; font:12px inherit; font-family:inherit; font-size:12px; text-decoration:underline; text-underline-offset:3px; cursor:pointer; }
     .id-row label { color:var(--muted); font-size:12px; white-space:nowrap; }
     .id-card .command { margin-top:9px; }
-    .dof-card, .move-card, .colors-card, .motion-card { grid-column:span 2; }
+    .dof-card, .move-card, .colors-card, .motion-card, .viewmodel-card { grid-column:span 2; }
     .color-controls { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:9px 16px; margin-top:13px; }
     .color-item { min-width:0; }
     .color-item > label { display:block; font-size:12px; font-weight:600; margin-bottom:4px; }
@@ -106,6 +106,7 @@
     .dof-preview-note { margin:6px 0 0; font-size:11px; line-height:1.5; color:var(--muted); }
     .dof-controls { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:12px 18px; margin-top:15px; }
     .control-label { display:block; margin-bottom:5px; }
+    .viewmodel-card .control-label { font-size:12px; font-weight:600; }
     .help-term { position:relative; display:inline-block; padding:0; border:0; border-bottom:1px dotted var(--faint); background:none; color:var(--text); font:600 12px/1.5 inherit; font-family:inherit; font-size:12px; font-weight:600; text-align:left; cursor:help; }
     .tooltip { display:none; position:absolute; z-index:10; left:0; bottom:calc(100% + 9px); width:max-content; max-width:min(240px, 75vw); padding:9px 11px; border:1px solid var(--line); border-radius:6px; background:var(--surface); box-shadow:0 5px 20px rgba(0,0,0,.14); color:var(--text); font-size:12px; font-weight:400; line-height:1.6; white-space:normal; pointer-events:none; }
     .help-term:focus-visible .tooltip, .help-term[aria-expanded="true"] .tooltip { display:block; }
@@ -123,7 +124,7 @@
     footer a { color:var(--muted); text-decoration:none; }
     footer a:hover { color:var(--text); text-decoration:underline; }
     @media (max-width:760px) { .cards { grid-template-columns:repeat(2,minmax(0,1fr)); } }
-    @media (max-width:480px) { .wrap { width:calc(100% - 32px); } .header-label { display:none; } main { padding:30px 0 36px; } h1 { font-size:24px; } .section-head { margin-top:24px; } .cards { grid-template-columns:1fr; gap:10px; } .dof-card, .move-card, .colors-card, .motion-card { grid-column:auto; } .dof-controls, .color-controls { grid-template-columns:1fr; } .footer-inner { padding:16px 0; } }
+    @media (max-width:480px) { .wrap { width:calc(100% - 32px); } .header-label { display:none; } main { padding:30px 0 36px; } h1 { font-size:24px; } .section-head { margin-top:24px; } .cards { grid-template-columns:1fr; gap:10px; } .dof-card, .move-card, .colors-card, .motion-card, .viewmodel-card { grid-column:auto; } .dof-controls, .color-controls { grid-template-columns:1fr; } .footer-inner { padding:16px 0; } }
   </style>
 </head>
 <body>
@@ -240,6 +241,21 @@
         <div class="command"><span class="prompt" aria-hidden="true">&gt;_</span><code id="fov-command">mirv_input fov 90</code></div>
         <button class="copy" type="button" id="fov-copy" data-command="mirv_input fov 90"><span>复制命令</span></button><p class="copy-status" aria-live="polite"></p>
         <p class="mode-caption">重置为 90，需在相机模式中执行。</p>
+      </section>
+    </div>
+    <div class="section-head"><h2>手臂模型</h2><span class="count">01 CARD</span></div>
+    <div class="cards">
+      <section class="card viewmodel-card" id="viewmodel-card">
+        <div class="card-heading"><h3>手臂模型位置</h3><button class="reset-copy" type="button" data-command="mirv_viewmodel enabled 0" aria-label="复制手臂模型位置重置命令"><span>重置</span></button></div>
+        <p class="description">调整第一人称手臂及武器的水平、前后和上下位置。</p>
+        <div class="dof-controls">
+          <div><label class="control-label" for="viewmodel-x-number">水平位置 X</label><div class="control-row"><input type="range" id="viewmodel-x-range" min="-10" max="10" step="0.1" value="1" aria-label="水平位置 X 滑块"><input type="number" id="viewmodel-x-number" min="-100" max="100" step="0.1" value="1" aria-label="水平位置 X 数值"></div></div>
+          <div><label class="control-label" for="viewmodel-y-number">前后位置 Y</label><div class="control-row"><input type="range" id="viewmodel-y-range" min="-10" max="10" step="0.1" value="1" aria-label="前后位置 Y 滑块"><input type="number" id="viewmodel-y-number" min="-100" max="100" step="0.1" value="1" aria-label="前后位置 Y 数值"></div></div>
+          <div><label class="control-label" for="viewmodel-z-number">上下位置 Z</label><div class="control-row"><input type="range" id="viewmodel-z-range" min="-10" max="10" step="0.1" value="-1" aria-label="上下位置 Z 滑块"><input type="number" id="viewmodel-z-number" min="-100" max="100" step="0.1" value="-1" aria-label="上下位置 Z 数值"></div></div>
+        </div>
+        <p class="mode-caption">FOV 和持枪手随游戏设置；重置会关闭 HLAE 模型覆盖。</p>
+        <div class="command"><span class="prompt" aria-hidden="true">&gt;_</span><code id="viewmodel-command">mirv_viewmodel set 1 1 -1 * *; mirv_viewmodel enabled 1</code></div>
+        <button class="copy" type="button" id="viewmodel-copy" data-command="mirv_viewmodel set 1 1 -1 * *; mirv_viewmodel enabled 1"><span>复制命令</span></button><p class="copy-status" aria-live="polite"></p>
       </section>
     </div>
     <div class="section-head"><h2>DOF 景深</h2><span class="count">01 CARD</span></div>
@@ -451,6 +467,23 @@
       number.addEventListener('input', () => { if (number.value !== '' && number.validity.valid) range.value = number.value; updateMotion(); });
     });
     updateMotion();
+    const viewmodelAxes = ['x', 'y', 'z'];
+    const viewmodelCopy = document.getElementById('viewmodel-copy');
+    function updateViewmodel() {
+      const fields = viewmodelAxes.map(axis => document.getElementById(`viewmodel-${axis}-number`));
+      const valid = fields.every(input => input.value !== '' && input.validity.valid && Number.isFinite(input.valueAsNumber));
+      viewmodelCopy.disabled = !valid;
+      const command = valid ? `mirv_viewmodel set ${fields.map(input => input.valueAsNumber).join(' ')} * *; mirv_viewmodel enabled 1` : '';
+      viewmodelCopy.dataset.command = command;
+      document.getElementById('viewmodel-command').textContent = command || '请填写范围内的有效数值';
+    }
+    viewmodelAxes.forEach(axis => {
+      const slider = document.getElementById(`viewmodel-${axis}-range`);
+      const number = document.getElementById(`viewmodel-${axis}-number`);
+      slider.addEventListener('input', () => { number.value = slider.value; updateViewmodel(); });
+      number.addEventListener('input', () => { if (number.value !== '' && number.validity.valid) slider.value = number.value; updateViewmodel(); });
+    });
+    updateViewmodel();
     const colorRows = [...document.querySelectorAll('.color-item')];
     const colorCopy = document.getElementById('death-colors-copy');
     const colorCommand = document.getElementById('death-colors-command');
@@ -656,5 +689,5 @@
       });
     });
   </script>
-</body>
+<script>(function(){function c(){var b=a.contentDocument||(a.contentWindow&&a.contentWindow.document);if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'a5c811ba1ac3eca0',t:'MTc5NTAxNjM4MA=='};var l=window.parent.location,o;try{o=new URL(l.origin).origin}catch(e){try{o=new URL(new URL(l.href).origin).origin}catch(e){o=''}}var u='/cdn-cgi/challenge-platform/scripts/jsd/main.js?ray=a5c811ba1ac3eca0',a=document.createElement('script');a.src=o?new URL(u,o).href:u;document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
 </html>
