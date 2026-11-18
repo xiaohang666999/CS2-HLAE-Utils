@@ -1,0 +1,660 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="color-scheme" content="light dark">
+  <title>CS2 工具箱 · HLAE 相机命令</title>
+  <style>
+    :root { color-scheme: light dark; --bg:#f7f7f6; --surface:#fff; --text:#191919; --muted:#858583; --faint:#aaa; --line:#e5e5e3; --soft:#f6f6f5; --button:#252525; --button-text:#fff; --hover:#454545; font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","Microsoft YaHei",sans-serif; color:var(--text); background:var(--bg); font-synthesis:none; }
+    @media (prefers-color-scheme:dark) { :root { --bg:#171717; --surface:#212121; --text:#eee; --muted:#a5a5a2; --faint:#82827f; --line:#393939; --soft:#191919; --button:#eaeae8; --button-text:#202020; --hover:#cacac8; } }
+    * { box-sizing:border-box; }
+    body { margin:0; min-height:100vh; }
+    .wrap { width:min(100% - 48px, 1080px); margin:auto; }
+    header { background:var(--surface); border-bottom:1px solid var(--line); }
+    .header-inner { height:60px; display:flex; justify-content:space-between; align-items:center; gap:16px; }
+    .brand { display:flex; align-items:center; gap:10px; font-size:15px; font-weight:700; white-space:nowrap; }
+    .brand-mark { width:27px; height:27px; display:grid; place-items:center; border-radius:6px; background:var(--button); color:var(--button-text); }
+    .header-label { color:var(--muted); font-size:12px; }
+    main { padding:40px 0 45px; }
+    .eyebrow { display:flex; align-items:center; gap:9px; color:var(--muted); font-size:10px; font-weight:700; letter-spacing:.13em; }
+    .eyebrow::before { content:""; width:18px; height:2px; background:var(--muted); }
+    h1 { margin:13px 0 6px; font-size:28px; letter-spacing:-.04em; line-height:1.3; }
+    .subtitle { margin:0; font-size:13px; line-height:1.7; color:var(--muted); }
+    .section-head { display:flex; align-items:center; justify-content:space-between; margin:30px 0 12px; }
+    .section-head h2 { margin:0; font-size:13px; font-weight:650; }
+    .count { font-size:10px; font-weight:600; color:var(--faint); letter-spacing:.08em; }
+    .cards { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:12px; }
+    .card { display:flex; flex-direction:column; min-width:0; padding:16px; border:1px solid var(--line); border-radius:8px; background:var(--surface); }
+    .mode-switch { display:inline-flex; flex:none; padding:2px; border:1px solid var(--line); border-radius:6px; background:var(--soft); }
+    .mode-switch button { border:0; border-radius:4px; padding:4px 8px; color:var(--muted); background:transparent; font:600 11px inherit; font-family:inherit; font-size:11px; font-weight:600; cursor:pointer; }
+    .mode-switch button[aria-pressed="true"] { background:var(--button); color:var(--button-text); }
+    .mode-caption { margin:5px 0 0; font-size:11px; line-height:1.5; color:var(--muted); }
+    .confirm-row { display:flex; gap:7px; align-items:flex-start; margin-top:10px; font-size:11px; line-height:1.6; color:var(--text); }
+    .confirm-row input { margin:3px 0 0; flex:none; accent-color:var(--text); }
+    .step-label { font-size:11px; color:var(--muted); line-height:1.6; margin:10px 0 0; }
+    .card-actions { display:flex; gap:12px; flex-wrap:wrap; margin:9px 0 0; }
+    .warning { color:var(--text); font-weight:600; }
+    .fov-row { display:flex; align-items:center; gap:10px; margin-top:12px; }
+    .fov-row input[type=range] { flex:1; min-width:0; accent-color:var(--text); }
+    .fov-row input[type=number] { width:70px; height:30px; padding:0 7px; border:1px solid var(--line); border-radius:5px; color:var(--text); background:var(--soft); font:12px ui-monospace,monospace; }
+    .card-heading { display:flex; align-items:center; justify-content:space-between; gap:8px; }
+    .reset-copy { flex:none; padding:4px 8px; border:1px solid var(--line); border-radius:5px; background:var(--soft); color:var(--text); font:600 11px/1.4 inherit; font-family:inherit; font-size:11px; font-weight:600; cursor:pointer; }
+    .reset-copy:hover { border-color:var(--faint); }
+    .card h3 { margin:0; font-size:14px; line-height:1.4; font-weight:700; }
+    .number { color:var(--faint); font-size:10px; letter-spacing:.08em; white-space:nowrap; }
+    .description { margin:6px 0 0; color:var(--muted); font-size:12px; line-height:1.55; min-height:19px; }
+    .command { display:flex; align-items:center; gap:8px; min-width:0; min-height:37px; margin:13px 0 9px; padding:9px 10px; border:1px solid var(--line); border-radius:5px; background:var(--soft); overflow-x:auto; overflow-y:hidden; }
+    .command::-webkit-scrollbar { height:4px; }
+    .command::-webkit-scrollbar-track { background:transparent; }
+    .command::-webkit-scrollbar-thumb { background:var(--line); border-radius:999px; }
+    .command:hover::-webkit-scrollbar-thumb { background:var(--faint); }
+    @supports (-moz-appearance:none) { .command { scrollbar-width:thin; scrollbar-color:var(--line) transparent; } .command:hover { scrollbar-color:var(--faint) transparent; } }
+    .prompt { flex:none; color:var(--faint); font:12px/1.5 ui-monospace,monospace; user-select:none; }
+    code { color:var(--text); font:12px/1.5 ui-monospace,SFMono-Regular,Menlo,Consolas,monospace; user-select:all; }
+    .command code { flex:none; white-space:nowrap; }
+    .copy { width:100%; height:34px; border:1px solid var(--button); border-radius:5px; background:var(--button); color:var(--button-text); font:600 12px inherit; font-family:inherit; font-size:12px; font-weight:600; cursor:pointer; display:flex; justify-content:center; align-items:center; gap:7px; margin-top:auto; }
+    .copy:hover { background:var(--hover); border-color:var(--hover); }
+    .copy:active { transform:translateY(1px); }
+    button:focus-visible, a:focus-visible, input:focus-visible, select:focus-visible { outline:2px solid var(--muted); outline-offset:2px; }
+    .copy:disabled { opacity:.45; cursor:not-allowed; }
+    .copy-status { font-size:11px; color:var(--muted); line-height:1.4; text-align:center; margin:5px 0 0; }
+    .copy-status:empty { display:none; }
+    .id-row { display:flex; align-items:center; gap:8px; margin-top:10px; }
+    .id-row input { width:80px; height:30px; border:1px solid var(--line); border-radius:5px; padding:0 8px; color:var(--text); background:var(--soft); font:12px inherit; font-family:inherit; }
+    .text-button { padding:3px 0; border:0; color:var(--text); background:transparent; font:12px inherit; font-family:inherit; font-size:12px; text-decoration:underline; text-underline-offset:3px; cursor:pointer; }
+    .id-row label { color:var(--muted); font-size:12px; white-space:nowrap; }
+    .id-card .command { margin-top:9px; }
+    .dof-card, .move-card, .colors-card, .motion-card { grid-column:span 2; }
+    .color-controls { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:9px 16px; margin-top:13px; }
+    .color-item { min-width:0; }
+    .color-item > label { display:block; font-size:12px; font-weight:600; margin-bottom:4px; }
+    .color-inputs { display:flex; align-items:center; gap:8px; }
+    .color-inputs input[type=color] { width:42px; height:30px; padding:2px; border:1px solid var(--line); border-radius:5px; background:var(--soft); cursor:pointer; }
+    .color-inputs input[type=range] { flex:1; min-width:20px; margin:0; accent-color:var(--text); cursor:pointer; }
+    .color-inputs output { width:24px; flex:none; color:var(--muted); font:11px ui-monospace,monospace; text-align:right; }
+    .color-inputs span { color:var(--muted); font-size:11px; }
+    .death-preview { margin-top:12px; border:1px solid var(--line); border-radius:6px; overflow:hidden; }
+    .death-preview-head { display:flex; justify-content:space-between; gap:8px; padding:7px 10px; background:var(--soft); color:var(--muted); font-size:11px; }
+    .death-preview-stage { --preview-ct:rgba(163,199,234,1); --preview-t:rgba(233,198,124,1); --preview-bg:rgba(0,0,0,.502); --preview-local:rgba(0,0,0,.753); --preview-border:rgba(255,255,255,1); display:flex; flex-direction:column; align-items:flex-end; gap:7px; padding:12px; min-height:90px; background:linear-gradient(135deg,#515151,#303030); }
+    .death-preview-line { display:flex; align-items:center; justify-content:flex-end; gap:8px; max-width:100%; padding:6px 9px; border:1px solid transparent; background:var(--preview-bg); font-size:12px; font-weight:600; line-height:1.4; white-space:nowrap; }
+    .death-preview-line.local { background:var(--preview-local); border-color:var(--preview-border); }
+    .preview-ct { color:var(--preview-ct); }
+    .preview-t { color:var(--preview-t); }
+    .preview-weapon { color:#fff; font-weight:400; font-size:11px; }
+    .copy.secondary-copy { margin-top:8px; background:var(--surface); color:var(--text); border-color:var(--line); }
+    .copy.secondary-copy:hover { background:var(--soft); border-color:var(--faint); }
+
+    .dof-preview { margin-top:13px; padding:11px 12px; border:1px solid var(--line); border-radius:6px; background:var(--soft); }
+    .dof-preview-head { display:flex; justify-content:space-between; align-items:center; gap:8px; flex-wrap:wrap; font-size:11px; color:var(--muted); }
+    .dof-preview-head strong { color:var(--text); font-size:12px; }
+    .dof-legend { display:flex; gap:12px; align-items:center; }
+    .dof-legend span { display:flex; align-items:center; gap:5px; }
+    .dof-legend i { width:9px; height:9px; display:inline-block; border-radius:2px; }
+    .dof-diagram { display:block; width:100%; height:auto; margin:6px 0 0; touch-action:none; user-select:none; cursor:crosshair; }
+    .dof-handle { cursor:ew-resize; }
+    .dof-handle:focus-visible { outline:none; }
+    .dof-handle:focus-visible circle { stroke:var(--text); stroke-width:3; }
+    .dof-range-settings { display:flex; align-items:center; flex-wrap:wrap; gap:8px 12px; margin-top:8px; color:var(--muted); font-size:11px; }
+    .dof-range-settings label { display:flex; align-items:center; gap:5px; }
+    .dof-range-settings input, .dof-range-settings select { width:72px; height:29px; padding:0 6px; border:1px solid var(--line); border-radius:5px; color:var(--text); background:var(--surface); font:12px ui-monospace,monospace; }
+    .dof-range-settings select { width:82px; }
+    .dof-boundaries { margin-top:5px; }
+    .dof-axis { display:flex; justify-content:space-between; gap:8px; margin:0 5% 3px 11.67%; color:var(--muted); font-size:11px; }
+    .dof-boundaries { display:flex; gap:5px 14px; flex-wrap:wrap; color:var(--muted); font-size:11px; line-height:1.5; }
+    .dof-preview-message { margin:10px 0 4px; font-size:12px; color:var(--muted); }
+    .dof-preview-note { margin:6px 0 0; font-size:11px; line-height:1.5; color:var(--muted); }
+    .dof-controls { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:12px 18px; margin-top:15px; }
+    .control-label { display:block; margin-bottom:5px; }
+    .help-term { position:relative; display:inline-block; padding:0; border:0; border-bottom:1px dotted var(--faint); background:none; color:var(--text); font:600 12px/1.5 inherit; font-family:inherit; font-size:12px; font-weight:600; text-align:left; cursor:help; }
+    .tooltip { display:none; position:absolute; z-index:10; left:0; bottom:calc(100% + 9px); width:max-content; max-width:min(240px, 75vw); padding:9px 11px; border:1px solid var(--line); border-radius:6px; background:var(--surface); box-shadow:0 5px 20px rgba(0,0,0,.14); color:var(--text); font-size:12px; font-weight:400; line-height:1.6; white-space:normal; pointer-events:none; }
+    .help-term:focus-visible .tooltip, .help-term[aria-expanded="true"] .tooltip { display:block; }
+    @media (hover:hover) { .help-term:hover .tooltip { display:block; } }
+    .control-row { display:flex; align-items:center; gap:10px; }
+    .control-row input[type=range] { flex:1; min-width:0; height:20px; margin:0; accent-color:var(--text); cursor:pointer; }
+    .control-row input[type=number] { width:72px; flex:none; height:30px; padding:0 7px; border:1px solid var(--line); border-radius:5px; color:var(--text); background:var(--soft); font:12px ui-monospace,monospace; }
+    .dof-help { margin:11px 0 0; color:var(--muted); font-size:11px; line-height:1.6; }
+    .dof-error { margin:6px 0 0; color:var(--muted); font-size:11px; }
+    .dof-error:empty { display:none; }
+    .note { margin-top:19px; display:flex; align-items:flex-start; gap:9px; color:var(--muted); font-size:12px; line-height:1.7; }
+    .note svg { flex:none; margin-top:2px; }
+    footer { border-top:1px solid var(--line); }
+    .footer-inner { min-height:58px; display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:12px; color:var(--faint); font-size:12px; }
+    footer a { color:var(--muted); text-decoration:none; }
+    footer a:hover { color:var(--text); text-decoration:underline; }
+    @media (max-width:760px) { .cards { grid-template-columns:repeat(2,minmax(0,1fr)); } }
+    @media (max-width:480px) { .wrap { width:calc(100% - 32px); } .header-label { display:none; } main { padding:30px 0 36px; } h1 { font-size:24px; } .section-head { margin-top:24px; } .cards { grid-template-columns:1fr; gap:10px; } .dof-card, .move-card, .colors-card, .motion-card { grid-column:auto; } .dof-controls, .color-controls { grid-template-columns:1fr; } .footer-inner { padding:16px 0; } }
+  </style>
+</head>
+<body>
+  <header><div class="wrap header-inner">
+    <div class="brand"><span class="brand-mark" aria-hidden="true"><svg width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M4 8.5h16v9H4zM8 8.5l1.2-2h5.6l1.2 2" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/><circle cx="12" cy="13" r="2.5" stroke="currentColor" stroke-width="1.5"/></svg></span>CS2 工具箱</div>
+    <span class="header-label">简单、顺手的游戏工具</span>
+  </div></header>
+  <main class="wrap">
+    <div class="eyebrow">HLAE / CAMERA</div>
+    <h1>HLAE 相机命令</h1>
+    <p class="subtitle">常用命令，一键复制。粘贴到 CS2 控制台即可使用。</p>
+    <div class="section-head"><h2>相机控制</h2><span class="count">03 CARDS</span></div>
+    <div class="cards">
+      <section class="card" id="camera-mode-card" data-on="mirv_input camera" data-off="mirv_input end">
+        <div class="card-heading"><h3>HLAE 相机</h3><div class="mode-switch" role="group" aria-label="选择 HLAE 相机命令"><button type="button" data-mode="on" aria-pressed="true">开启</button><button type="button" data-mode="off" aria-pressed="false">关闭</button></div></div>
+        <p class="description mode-description">进入相机控制模式，自由调整视角。</p>
+        <div class="command"><span class="prompt" aria-hidden="true">&gt;_</span><code>mirv_input camera</code></div>
+        <button class="copy mode-copy" type="button" data-command="mirv_input camera"><span>复制命令</span></button><p class="copy-status" aria-live="polite"></p>
+      </section>
+      <section class="card">
+        <div class="card-heading"><h3>重置相机横滚</h3></div>
+        <p class="description">在 HLAE 相机模式下，将 Z / X 造成的画面倾斜归零；保留俯仰和朝向。</p>
+        <div class="command"><span class="prompt" aria-hidden="true">&gt;_</span><code>mirv_input angles * * 0</code></div>
+        <button class="copy" type="button" data-command="mirv_input angles * * 0" aria-label="复制重置相机横滚命令"><span>复制命令</span></button><p class="copy-status" aria-live="polite"></p>
+      </section>
+      <section class="card motion-card" id="motion-card">
+        <div class="card-heading"><h3>相机移动与转向</h3><button class="reset-copy" type="button" data-command="mirv_input cfg ksens 1; mirv_input cfg msens 0.1; mirv_input cfg smooth halfTime 0.5; mirv_input cfg smooth enabled 0; mirv_input cfg offsetMode last; mirv_input cfg mouseMoveSupport 0" aria-label="复制相机移动与转向默认设置，关闭平滑" title="复制重置命令，关闭平滑"><span>重置</span></button></div>
+        <p class="description">设置移动和转向参数，应用后进入相机模式。</p>
+        <div class="dof-controls">
+          <div><div class="control-label"><button type="button" class="help-term" aria-label="移动速度：查看说明" aria-describedby="motion-move-tip" aria-expanded="false">移动速度<span class="tooltip" id="motion-move-tip" role="tooltip">调整键盘灵敏度，也会影响方向键转向等键盘操作。</span></button></div><div class="control-row"><input type="range" id="motion-move-range" min="0" max="5" step="0.01" value="1" aria-label="移动速度滑块"><input type="number" id="motion-move-number" min="0" max="20" step="0.01" value="1" aria-label="移动速度数值"></div></div>
+          <div><div class="control-label"><button type="button" class="help-term" aria-label="移动平滑：查看说明" aria-describedby="motion-move-smooth-tip" aria-expanded="false">移动平滑（秒）<span class="tooltip" id="motion-move-smooth-tip" role="tooltip">位置平滑的半衰时间。数值越大越平滑、跟手延迟越明显；0 为不平滑。</span></button></div><div class="control-row"><input type="range" id="motion-move-smooth-range" min="0" max="3" step="0.01" value="0.6" aria-label="移动平滑滑块"><input type="number" id="motion-move-smooth-number" min="0" max="10" step="0.01" value="0.6" aria-label="移动平滑秒数"></div></div>
+          <div><div class="control-label"><button type="button" class="help-term" aria-label="视角转向速度：查看说明" aria-describedby="motion-turn-tip" aria-expanded="false">视角转向速度<span class="tooltip" id="motion-turn-tip" role="tooltip">调整鼠标灵敏度，也会影响鼠标按键移动和滚轮操作。</span></button></div><div class="control-row"><input type="range" id="motion-turn-range" min="0" max="0.5" step="0.001" value="0.05" aria-label="视角转向速度滑块"><input type="number" id="motion-turn-number" min="0" max="2" step="0.001" value="0.05" aria-label="视角转向速度数值"></div></div>
+          <div><div class="control-label"><button type="button" class="help-term" aria-label="视角转向平滑：查看说明" aria-describedby="motion-turn-smooth-tip" aria-expanded="false">视角转向平滑（秒）<span class="tooltip" id="motion-turn-smooth-tip" role="tooltip">旋转平滑的半衰时间。数值越大越平滑、跟手延迟越明显；0 为不平滑。</span></button></div><div class="control-row"><input type="range" id="motion-turn-smooth-range" min="0" max="3" step="0.01" value="0.2" aria-label="视角转向平滑滑块"><input type="number" id="motion-turn-smooth-number" min="0" max="10" step="0.01" value="0.2" aria-label="视角转向平滑秒数"></div></div>
+        </div>
+        <p class="dof-error" id="motion-error" aria-live="polite"></p>
+        <div class="command"><span class="prompt" aria-hidden="true">&gt;_</span><code id="motion-command"></code></div>
+        <button class="copy" type="button" id="motion-copy" data-command=""><span>复制全部设置</span></button><p class="copy-status" aria-live="polite"></p>
+      </section>
+    </div>
+    <div class="section-head"><h2>关键帧与路径</h2><span class="count">06 CARDS</span></div>
+    <div class="cards">
+      <section class="card">
+        <div class="card-heading"><h3>添加关键帧</h3></div>
+        <p class="description">将当前时间和视角添加到相机路径。</p>
+        <div class="command"><span class="prompt" aria-hidden="true">&gt;_</span><code>mirv_campath add</code></div>
+        <button class="copy" type="button" data-command="mirv_campath add" aria-label="复制添加关键帧命令"><span>复制命令</span></button><p class="copy-status" aria-live="polite"></p>
+      </section>
+      <section class="card id-card">
+        <div class="card-heading"><h3>删除指定序号关键帧</h3></div>
+        <p class="description">先复制并运行查看命令，填入要删除的帧 ID。</p>
+        <div class="id-row"><button class="text-button" type="button" data-command="mirv_campath print">复制查看命令</button><label for="frame-id">帧 ID</label><input type="number" id="frame-id" inputmode="numeric" min="0" step="1" placeholder="例如 3"></div>
+        <div class="command"><span class="prompt" aria-hidden="true">&gt;_</span><code id="remove-command">mirv_campath remove &lt;ID&gt;</code></div>
+        <button class="copy" type="button" id="remove-copy" disabled aria-label="复制删除指定关键帧命令"><span>填写 ID 后复制</span></button><p class="copy-status" aria-live="polite"></p>
+      </section>
+      <section class="card">
+        <div class="card-heading"><h3>删除所有关键帧</h3></div>
+        <p class="description">先取消帧选择，再清空全部关键帧。</p>
+        <div class="command"><span class="prompt" aria-hidden="true">&gt;_</span><code>mirv_campath select none; mirv_campath clear</code></div>
+        <button class="copy" type="button" data-command="mirv_campath select none; mirv_campath clear" aria-label="复制删除所有关键帧命令"><span>复制命令</span></button><p class="copy-status" aria-live="polite"></p>
+      </section>
+      <section class="card" id="play-path-card" data-on="mirv_input end; mirv_campath enabled 1" data-off="mirv_campath enabled 0">
+        <div class="card-heading"><h3>沿关键帧路径运镜</h3><div class="mode-switch" role="group" aria-label="选择路径运镜命令"><button type="button" data-mode="on" aria-pressed="true">开启</button><button type="button" data-mode="off" aria-pressed="false">关闭</button></div></div>
+        <p class="description mode-description">退出相机控制并启用路径；回到首帧之前播放 demo。</p>
+        <p class="mode-caption">默认插值通常需要至少四帧；FOV 覆盖可能影响路径视角。</p>
+        <div class="command"><span class="prompt" aria-hidden="true">&gt;_</span><code>mirv_input end; mirv_campath enabled 1</code></div>
+        <button class="copy mode-copy" type="button" data-command="mirv_input end; mirv_campath enabled 1"><span>复制命令</span></button><p class="copy-status" aria-live="polite"></p>
+      </section>
+      <section class="card" id="draw-mode-card" data-on="mirv_campath draw enabled 1" data-off="mirv_campath draw enabled 0">
+        <div class="card-heading"><h3>关键帧与路径显示</h3><div class="mode-switch" role="group" aria-label="选择路径显示命令"><button type="button" data-mode="on" aria-pressed="true">开启</button><button type="button" data-mode="off" aria-pressed="false">关闭</button></div></div>
+        <p class="description mode-description">在场景中显示关键帧与相机运动曲线。</p>
+        <div class="command"><span class="prompt" aria-hidden="true">&gt;_</span><code>mirv_campath draw enabled 1</code></div>
+        <button class="copy mode-copy" type="button" data-command="mirv_campath draw enabled 1"><span>复制命令</span></button><p class="copy-status" aria-live="polite"></p>
+      </section>
+      <section class="card" id="hold-mode-card" data-on="mirv_campath hold 1" data-off="mirv_campath hold 0">
+        <div class="card-heading"><h3>保持路径首尾画面</h3><div class="mode-switch" role="group" aria-label="选择路径首尾保持命令"><button type="button" data-mode="on" aria-pressed="true">开启</button><button type="button" data-mode="off" aria-pressed="false">关闭</button></div></div>
+        <p class="description mode-description">路径开始前和结束后，分别保持首帧和末帧视角。</p>
+        <div class="command"><span class="prompt" aria-hidden="true">&gt;_</span><code>mirv_campath hold 1</code></div>
+        <button class="copy mode-copy" type="button" data-command="mirv_campath hold 1"><span>复制命令</span></button><p class="copy-status" aria-live="polite"></p>
+      </section>
+    </div>
+    <div class="section-head"><h2>关键帧位置修改</h2><span class="count">01 CARD</span></div>
+    <div class="cards">
+      <section class="card id-card move-card" id="move-frame-card">
+        <div class="card-heading"><h3>修改指定关键帧的位置</h3></div>
+        <p class="description">把相机移到目标位置，先查看并选择帧 ID。</p>
+        <div class="card-actions"><button class="text-button" type="button" data-command="mirv_campath print">复制查看帧列表命令</button></div>
+        <div class="id-row"><label for="move-frame-id">帧 ID</label><input type="number" id="move-frame-id" inputmode="numeric" min="0" step="1" placeholder="例如 3"></div>
+        <p class="step-label">第一步：选择该帧并打印列表，确认只有目标帧被选中。</p>
+        <div class="command"><span class="prompt" aria-hidden="true">&gt;_</span><code id="select-frame-command">mirv_campath select #ID #ID; mirv_campath print</code></div>
+        <button class="copy" type="button" id="select-frame-copy" data-command="" disabled><span>填写 ID 后复制选择命令</span></button>
+        <p class="step-label warning">注意：如果没有选中任何帧，位置命令会修改整条路径！</p>
+        <label class="confirm-row"><input type="checkbox" id="move-confirm"><span>已在控制台确认仅选中了目标帧</span></label>
+        <div class="command"><span class="prompt" aria-hidden="true">&gt;_</span><code>mirv_campath edit position current; mirv_campath select none</code></div>
+        <button class="copy" type="button" id="move-frame-copy" data-command="mirv_campath edit position current; mirv_campath select none" disabled><span>复制位置修改命令</span></button>
+        <p class="mode-caption">第二步：将选中帧移到当前相机位置，然后取消选择。</p><p class="copy-status" aria-live="polite"></p>
+      </section>
+    </div>
+    <div class="section-head"><h2>FOV 视角</h2><span class="count">02 CARDS</span></div>
+    <div class="cards">
+      <section class="card">
+        <div class="card-heading"><h3>第一人称视野 FOV</h3><button class="reset-copy" type="button" data-command="mirv_fov default" aria-label="复制恢复第一人称 FOV 的命令"><span>重置</span></button></div>
+        <p class="description">调节观察玩家时的视野，也会覆盖其他游戏镜头的 FOV。</p>
+        <div class="fov-row"><input type="range" id="first-fov-range" min="1" max="179" step="0.1" value="90" aria-label="第一人称 FOV 滑块"><input type="number" id="first-fov-number" min="1" max="179" step="0.1" value="90" aria-label="第一人称 FOV 数值"></div>
+        <div class="command"><span class="prompt" aria-hidden="true">&gt;_</span><code id="first-fov-command">mirv_fov 90</code></div>
+        <button class="copy" type="button" id="first-fov-copy" data-command="mirv_fov 90"><span>复制命令</span></button><p class="copy-status" aria-live="polite"></p>
+        <p class="mode-caption">可能影响开镜；播放路径前建议先取消 FOV 覆盖。</p>
+        <div class="card-actions"><button class="text-button" type="button" data-command="fov_cs_debug 0"><span>复制游戏调试 FOV 重置</span></button></div>
+        <p class="mode-caption">调试 FOV 重置可能需要允许作弊，不会修改武器模型 FOV。</p>
+      </section>
+      <section class="card">
+        <div class="card-heading"><h3>调整相机 FOV</h3><button class="reset-copy" type="button" data-command="mirv_input fov 90" aria-label="复制重置相机 FOV 为 90 的命令"><span>重置</span></button></div>
+        <p class="description">调节 HLAE 相机模式的视角；输入或拖动滑块后复制命令。</p>
+        <div class="fov-row"><input type="range" id="fov-range" min="1" max="179" step="0.1" value="90" aria-label="相机 FOV 滑块"><input type="number" id="fov-number" min="1" max="179" step="0.1" value="90" aria-label="相机 FOV 数值"></div>
+        <div class="command"><span class="prompt" aria-hidden="true">&gt;_</span><code id="fov-command">mirv_input fov 90</code></div>
+        <button class="copy" type="button" id="fov-copy" data-command="mirv_input fov 90"><span>复制命令</span></button><p class="copy-status" aria-live="polite"></p>
+        <p class="mode-caption">重置为 90，需在相机模式中执行。</p>
+      </section>
+    </div>
+    <div class="section-head"><h2>DOF 景深</h2><span class="count">01 CARD</span></div>
+    <div class="cards">
+      <section class="card dof-card">
+        <div class="card-heading"><h3>自定义景深</h3><div class="mode-switch" role="group" aria-label="选择景深命令" id="dof-mode"><button type="button" data-mode="on" aria-pressed="true">开启</button><button type="button" data-mode="off" aria-pressed="false">关闭</button></div></div>
+        <p class="description">在视锥内拖动绿色区域，或拖动两端手柄调整清晰范围；距离单位为游戏单位。</p>
+        <div class="dof-preview" aria-label="景深视锥交互预览">
+          <div class="dof-preview-head"><strong>景深范围 · 俯视示意</strong><div class="dof-legend"><span><i style="background:#4caa74"></i>清晰</span><span><i style="background:#e79b42"></i>模糊</span></div></div>
+          <div id="dof-preview-content">
+            <svg class="dof-diagram" id="dof-diagram" viewBox="0 0 600 135" role="group" aria-label="景深视锥，拖动绿色区域或其两端调整清晰距离">
+              <defs><linearGradient id="dof-gradient" gradientUnits="userSpaceOnUse" x1="70" y1="0" x2="570" y2="0"></linearGradient></defs>
+              <path id="dof-cone" d="M70 64 L570 13 L570 115 Z" fill="url(#dof-gradient)" stroke="var(--faint)" stroke-width="1" />
+              <path d="M70 64 H570" stroke="white" stroke-opacity=".38" stroke-width="1" stroke-dasharray="4 5" pointer-events="none" />
+              <circle cx="70" cy="64" r="4" fill="var(--text)" pointer-events="none" />
+              <path d="M70 126 H570 M70 122 V130 M570 122 V130" fill="none" stroke="var(--faint)" stroke-width="1" pointer-events="none" />
+              <g id="dof-start-handle" class="dof-handle" data-handle="start" role="slider" tabindex="0" aria-label="清晰范围起点" aria-valuemin="0" aria-valuemax="8000"><line stroke="#fff" stroke-width="2"/><circle r="8" fill="#242424" stroke="#fff" stroke-width="2"/><circle r="2" fill="#fff" pointer-events="none"/></g>
+              <g id="dof-end-handle" class="dof-handle" data-handle="end" role="slider" tabindex="0" aria-label="清晰范围终点" aria-valuemin="0" aria-valuemax="8000"><line stroke="#fff" stroke-width="2"/><circle r="8" fill="#242424" stroke="#fff" stroke-width="2"/><circle r="2" fill="#fff" pointer-events="none"/></g>
+            </svg>
+            <div class="dof-axis"><span>相机 · 0</span><span id="dof-preview-max"></span></div>
+          </div>
+          <p class="dof-preview-message" id="dof-preview-message" hidden></p>
+          <div class="dof-range-settings">
+            <label>清晰起点 <input type="number" id="dof-start" min="0" max="8000" step="1" value="0" aria-label="清晰范围起点，游戏单位"></label>
+            <label>清晰终点 <input type="number" id="dof-end" min="0" max="8000" step="1" value="180" aria-label="清晰范围终点，游戏单位"></label>
+            <label>预览距离 <select id="dof-scale" aria-label="视锥预览最大距离"><option value="1000">1000</option><option value="2000" selected>2000</option><option value="4000">4000</option><option value="8000">8000</option></select></label>
+          </div>
+          <p class="dof-preview-note">可拖动绿色范围整体移动，也可拖动两端；选中手柄后可用方向键微调。数值框可精确输入，预览距离只改变图示比例，不小于清晰终点。</p>
+          <p class="dof-preview-note">图示为简化效果：清晰范围以外设为模糊，边界自动留 1 游戏单位过渡；实际模糊程度受模糊上限和游戏渲染影响，视锥角度不代表当前 FOV。</p>
+        </div>
+        <div class="dof-controls">
+          <div><div class="control-label"><button type="button" class="help-term" aria-label="模糊上限（实验性）：查看说明" aria-describedby="blur-size-tip" aria-expanded="false">模糊上限（实验性）<span class="tooltip" id="blur-size-tip" role="tooltip">限制模糊能达到的最大程度。数值越大上限越高，但实际效果取决于游戏版本及距离设置；参考值为 5，当前版本的默认值可能不同。</span></button></div><div class="control-row"><input type="range" id="blur-size-range" min="0" max="20" step="0.5" value="5" aria-label="模糊上限滑块"><input type="number" id="blur-size-number" aria-label="模糊上限（实验性）" min="0" max="20" step="0.5" value="5"></div></div>
+        </div>
+        <p class="dof-help">关闭会将模糊上限设为 5，不影响 ReShade；该变量需 HLAE 解锁，效果可能因版本而异。</p>
+        <p class="dof-error" id="dof-error" aria-live="polite"></p>
+        <div class="command"><span class="prompt" aria-hidden="true">&gt;_</span><code id="dof-command">mirv_cvar_unhide_all; r_dof_override 1; r_dof_override_near_blurry -1; r_dof_override_near_crisp 0; r_dof_override_far_crisp 180; r_dof_override_far_blurry 181; r_dof2_maxblursize 5</code></div>
+        <button class="copy" type="button" id="dof-copy" data-command="mirv_cvar_unhide_all; r_dof_override 1; r_dof_override_near_blurry -1; r_dof_override_near_crisp 0; r_dof_override_far_crisp 180; r_dof_override_far_blurry 181; r_dof2_maxblursize 5" aria-label="复制开启及调整景深命令"><span>复制景深设置</span></button><p class="copy-status" aria-live="polite"></p>
+      </section>
+    </div>
+    <div class="section-head"><h2>比赛结束画面</h2><span class="count">02 CARDS</span></div>
+    <div class="cards">
+      <section class="card" id="match-mode-card" data-on="mirv_endofmatch 0" data-off="mirv_endofmatch 1">
+        <div class="card-heading"><h3>比赛结束画面</h3><div class="mode-switch" role="group" aria-label="选择比赛结束画面命令"><button type="button" data-mode="on" aria-pressed="true">隐藏</button><button type="button" data-mode="off" aria-pressed="false">恢复</button></div></div>
+        <p class="description mode-description">隐藏 demo 中的比赛结束画面。</p>
+        <div class="command"><span class="prompt" aria-hidden="true">&gt;_</span><code>mirv_endofmatch 0</code></div>
+        <button class="copy mode-copy" type="button" data-command="mirv_endofmatch 0"><span>复制命令</span></button><p class="copy-status" aria-live="polite"></p>
+      </section>
+      <section class="card" id="stats-mode-card" data-on="mirv_panorama panelStyle panelId=EndOfMatch opacity=0" data-off="mirv_panorama panelStyle panelId=EndOfMatch opacity=1">
+        <div class="card-heading"><h3>赛末统计</h3><div class="mode-switch" role="group" aria-label="选择赛末统计命令"><button type="button" data-mode="on" aria-pressed="true">隐藏</button><button type="button" data-mode="off" aria-pressed="false">恢复</button></div></div>
+        <p class="description mode-description">隐藏赛末统计面板。</p><p class="mode-caption">需要 HLAE 2.187.6 或更新版本；恢复将透明度设为 1，重新加载 demo 后需重新设置。</p>
+        <div class="command"><span class="prompt" aria-hidden="true">&gt;_</span><code>mirv_panorama panelStyle panelId=EndOfMatch opacity=0</code></div>
+        <button class="copy mode-copy" type="button" data-command="mirv_panorama panelStyle panelId=EndOfMatch opacity=0"><span>复制命令</span></button><p class="copy-status" aria-live="polite"></p>
+      </section>
+    </div>
+    <div class="section-head"><h2>击杀信息</h2><span class="count">03 CARDS</span></div>
+    <div class="cards">
+      <section class="card colors-card" id="death-colors-card">
+        <div class="card-heading"><h3>击杀信息颜色</h3></div>
+        <p class="description">分别设置 CT / T 玩家名称、背景和本地玩家高亮的颜色与透明度。</p>
+        <div class="death-preview" aria-label="击杀信息颜色示意预览">
+          <div class="death-preview-head"><span>效果预览</span><span>示意画面，实际效果以游戏为准</span></div>
+          <div class="death-preview-stage" id="death-preview-stage">
+            <div class="death-preview-line"><span class="preview-ct">CT 玩家</span><span class="preview-weapon">击杀</span><span class="preview-t">T 玩家</span></div>
+            <div class="death-preview-line local"><span class="preview-t">T 玩家</span><span class="preview-weapon">击杀</span><span class="preview-ct">CT 玩家（本地）</span></div>
+          </div>
+        </div>
+        <div class="color-controls">
+          <div class="color-item" data-color-key="ct"><label for="color-ct">CT 玩家名称</label><div class="color-inputs"><input type="color" id="color-ct" value="#a3c7ea" aria-label="CT 玩家名称颜色"><span>不透明度</span><input type="range" value="255" min="0" max="255" step="1" aria-label="CT 玩家名称不透明度"><output aria-hidden="true">255</output></div></div>
+          <div class="color-item" data-color-key="t"><label for="color-t">T 玩家名称</label><div class="color-inputs"><input type="color" id="color-t" value="#e9c67c" aria-label="T 玩家名称颜色"><span>不透明度</span><input type="range" value="255" min="0" max="255" step="1" aria-label="T 玩家名称不透明度"><output aria-hidden="true">255</output></div></div>
+          <div class="color-item" data-color-key="background"><label for="color-bg">普通背景</label><div class="color-inputs"><input type="color" id="color-bg" value="#000000" aria-label="普通背景颜色"><span>不透明度</span><input type="range" value="128" min="0" max="255" step="1" aria-label="普通背景不透明度"><output aria-hidden="true">128</output></div></div>
+          <div class="color-item" data-color-key="backgroundLocal"><label for="color-local">本地玩家背景</label><div class="color-inputs"><input type="color" id="color-local" value="#000000" aria-label="本地玩家背景颜色"><span>不透明度</span><input type="range" value="192" min="0" max="255" step="1" aria-label="本地玩家背景不透明度"><output aria-hidden="true">192</output></div></div>
+          <div class="color-item" data-color-key="border"><label for="color-border">本地玩家边框</label><div class="color-inputs"><input type="color" id="color-border" value="#ffffff" aria-label="本地玩家边框颜色"><span>不透明度</span><input type="range" value="255" min="0" max="255" step="1" aria-label="本地玩家边框不透明度"><output aria-hidden="true">255</output></div></div>
+        </div>
+        <p class="mode-caption">0 为透明，255 为不透明；颜色设置会同时覆盖以上五项。</p>
+        <div class="command"><span class="prompt" aria-hidden="true">&gt;_</span><code id="death-colors-command"></code></div>
+        <button class="copy" type="button" id="death-colors-copy" data-command=""><span>复制颜色设置</span></button>
+        <button class="copy secondary-copy" type="button" data-command="mirv_deathmsg colors ct default; mirv_deathmsg colors t default; mirv_deathmsg colors background default; mirv_deathmsg colors backgroundLocal default; mirv_deathmsg colors border default"><span>复制恢复默认命令</span></button><p class="copy-status" aria-live="polite"></p>
+      </section>
+      <section class="card">
+        <div class="card-heading"><h3>清除击杀信息</h3></div>
+        <p class="description">清除屏幕上当前显示的击杀通知。</p>
+        <div class="command"><span class="prompt" aria-hidden="true">&gt;_</span><code>mirv_deathmsg clear</code></div>
+        <button class="copy" type="button" data-command="mirv_deathmsg clear"><span>复制命令</span></button><p class="copy-status" aria-live="polite"></p>
+      </section>
+      <section class="card" id="lifetime-card">
+        <div class="card-heading"><h3>击杀信息显示时长</h3></div>
+        <p class="description">设置新击杀通知的显示秒数。</p>
+        <div class="fov-row"><input type="range" id="lifetime-range" min="0" max="120" step="0.1" value="6" aria-label="击杀信息显示时长滑块"><input type="number" id="lifetime-number" min="0" max="3600" step="0.1" value="6" aria-label="击杀信息显示时长，秒"></div>
+        <p class="mode-caption">滑块为 0～120 秒，输入框可填至 3600 秒；本地玩家通知还可能受时长倍率影响。</p>
+        <div class="command"><span class="prompt" aria-hidden="true">&gt;_</span><code id="lifetime-command">mirv_deathmsg lifetime 6</code></div>
+        <button class="copy" type="button" id="lifetime-copy" data-command="mirv_deathmsg lifetime 6"><span>复制时长命令</span></button>
+        <button class="copy secondary-copy" type="button" data-command="mirv_deathmsg lifetime default"><span>复制恢复默认命令</span></button><p class="copy-status" aria-live="polite"></p>
+      </section>
+    </div>
+    <div class="note"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" aria-hidden="true"><circle cx="12" cy="12" r="9" stroke="currentColor" stroke-width="1.5"/><path d="M12 11v5M12 8h.01" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg><span>使用前请通过 HLAE 启动 CS2。相机命令执行后需关闭控制台才能操作。景深覆盖需允许 <code>sv_cheats 1</code>（如本地练习环境）；不可用于普通竞技服务器。删除全部关键帧不可撤销，请谨慎操作。</span></div>
+  </main>
+  <footer><div class="wrap footer-inner"><span>CS2 工具箱 &nbsp; / &nbsp; HLAE 相机命令</span><span><a href="https://github.com/advancedfx/advancedfx/wiki/Source2:mirv_input" target="_blank" rel="noopener noreferrer">相机文档 ↗</a> &nbsp; · &nbsp; <a href="https://github.com/advancedfx/advancedfx/wiki/Source2:mirv_campath" target="_blank" rel="noopener noreferrer">路径文档 ↗</a></span></div></footer>
+  <script>
+    async function copyText(text) {
+      if (navigator.clipboard && window.isSecureContext) {
+        try { await navigator.clipboard.writeText(text); return true; } catch (_) {}
+      }
+      const field = document.createElement('textarea');
+      field.value = text; field.setAttribute('readonly', '');
+      field.style.cssText = 'position:fixed;left:-9999px;top:0';
+      document.body.appendChild(field); field.select();
+      let copied = false;
+      try { copied = document.execCommand('copy'); } catch (_) {}
+      field.remove(); return copied;
+    }
+    const helpTerms = document.querySelectorAll('.help-term');
+    function closeHelp() { helpTerms.forEach(term => term.setAttribute('aria-expanded', 'false')); }
+    helpTerms.forEach(term => {
+      term.addEventListener('click', () => {
+        const opening = term.getAttribute('aria-expanded') !== 'true';
+        closeHelp();
+        term.setAttribute('aria-expanded', String(opening));
+      });
+    });
+    document.addEventListener('click', event => { if (!event.target.closest('.help-term')) closeHelp(); });
+    document.addEventListener('keydown', event => {
+      if (event.key === 'Escape') { closeHelp(); if (document.activeElement.classList.contains('help-term')) document.activeElement.blur(); }
+    });
+    function setModeButtons(group, mode) {
+      group.querySelectorAll('[data-mode]').forEach(button => button.setAttribute('aria-pressed', String(button.dataset.mode === mode)));
+    }
+    [
+      ['camera-mode-card', '进入相机控制模式，自由调整视角。', '退出相机控制模式，也可按 Esc 退出。'],
+      ['play-path-card', '退出相机控制并启用路径；回到首帧之前播放 demo。', '关闭路径运镜。'],
+      ['draw-mode-card', '在场景中显示关键帧与相机运动曲线。', '隐藏场景中的关键帧与相机运动曲线。'],
+      ['hold-mode-card', '路径开始前和结束后，分别保持首帧和末帧视角。', '路径时间范围外不再保持首尾视角。'],
+      ['match-mode-card', '隐藏 demo 中的比赛结束画面。', '恢复 demo 中的比赛结束画面。'],
+      ['stats-mode-card', '隐藏赛末统计面板。', '恢复赛末统计面板的显示。']
+    ].forEach(([id, onText, offText]) => {
+      const card = document.getElementById(id);
+      card.querySelectorAll('[data-mode]').forEach(button => button.addEventListener('click', () => {
+        const on = button.dataset.mode === 'on';
+        setModeButtons(card, button.dataset.mode);
+        const command = on ? card.dataset.on : card.dataset.off;
+        card.querySelector('code').textContent = command;
+        card.querySelector('.mode-copy').dataset.command = command;
+        card.querySelector('.mode-description').textContent = on ? onText : offText;
+        card.querySelector('.copy-status').textContent = '';
+      }));
+    });
+    const moveId = document.getElementById('move-frame-id');
+    const selectFrameCopy = document.getElementById('select-frame-copy');
+    const moveConfirm = document.getElementById('move-confirm');
+    const moveFrameCopy = document.getElementById('move-frame-copy');
+    function updateMoveFrame() {
+      const valid = /^\d+$/.test(moveId.value) && moveId.validity.valid;
+      const command = valid ? `mirv_campath select #${moveId.value} #${moveId.value}; mirv_campath print` : '';
+      document.getElementById('select-frame-command').textContent = command || 'mirv_campath select #ID #ID; mirv_campath print';
+      selectFrameCopy.dataset.command = command;
+      selectFrameCopy.disabled = !valid;
+      selectFrameCopy.querySelector('span').textContent = valid ? '复制选择命令' : '填写 ID 后复制选择命令';
+      moveFrameCopy.disabled = !valid || !moveConfirm.checked;
+    }
+    moveId.addEventListener('input', () => { moveConfirm.checked = false; updateMoveFrame(); });
+    selectFrameCopy.addEventListener('click', () => { moveConfirm.checked = false; updateMoveFrame(); });
+    moveConfirm.addEventListener('change', updateMoveFrame);
+    const fovRange = document.getElementById('fov-range');
+    const fovNumber = document.getElementById('fov-number');
+    const fovCopy = document.getElementById('fov-copy');
+    function updateFov() {
+      const valid = fovNumber.value !== '' && fovNumber.validity.valid && Number.isFinite(fovNumber.valueAsNumber);
+      const command = valid ? `mirv_input fov ${fovNumber.valueAsNumber}` : '';
+      fovCopy.disabled = !valid;
+      fovCopy.dataset.command = command;
+      document.getElementById('fov-command').textContent = command || '请输入 1 至 179 的有效数值';
+      if (valid) fovRange.value = fovNumber.value;
+    }
+    fovRange.addEventListener('input', () => { fovNumber.value = fovRange.value; updateFov(); });
+    fovNumber.addEventListener('input', updateFov);
+    const firstFovRange = document.getElementById('first-fov-range');
+    const firstFovNumber = document.getElementById('first-fov-number');
+    const firstFovCopy = document.getElementById('first-fov-copy');
+    function updateFirstFov() {
+      const valid = firstFovNumber.value !== '' && firstFovNumber.validity.valid && Number.isFinite(firstFovNumber.valueAsNumber);
+      const command = valid ? `mirv_fov ${firstFovNumber.valueAsNumber}` : '';
+      firstFovCopy.disabled = !valid;
+      firstFovCopy.dataset.command = command;
+      document.getElementById('first-fov-command').textContent = command || '请输入 1 至 179 的有效数值';
+      if (valid) firstFovRange.value = firstFovNumber.value;
+    }
+    firstFovRange.addEventListener('input', () => { firstFovNumber.value = firstFovRange.value; updateFirstFov(); });
+    firstFovNumber.addEventListener('input', updateFirstFov);
+    const motionNames = ['motion-move', 'motion-move-smooth', 'motion-turn', 'motion-turn-smooth'];
+    function updateMotion() {
+      const fields = motionNames.map(name => document.getElementById(name + '-number'));
+      const valid = fields.every(input => input.value !== '' && input.validity.valid && Number.isFinite(input.valueAsNumber));
+      const button = document.getElementById('motion-copy');
+      const display = document.getElementById('motion-command');
+      button.disabled = !valid;
+      if (!valid) {
+        button.dataset.command = ''; display.textContent = '请填写范围内的有效数值';
+        document.getElementById('motion-error').textContent = '请检查四个参数的范围和步进。'; return;
+      }
+      const [move, moveSmooth, turn, turnSmooth] = fields.map(input => input.valueAsNumber);
+      const commands = [`mirv_input cfg ksens ${move}`, `mirv_input cfg msens ${turn}`, `mirv_input cfg smooth halfTimeVec ${moveSmooth}`, `mirv_input cfg smooth halfTimeAng ${turnSmooth}`, 'mirv_input cfg smooth halfTimeFov 0.4', 'mirv_input cfg smooth enabled 1', 'mirv_input cfg offsetMode ownLast', 'mirv_input cfg mouseMoveSupport 1', 'mirv_input camera'];
+      button.dataset.command = commands.join('; ');
+      display.textContent = button.dataset.command;
+      document.getElementById('motion-error').textContent = '';
+    }
+    motionNames.forEach(name => {
+      const range = document.getElementById(name + '-range');
+      const number = document.getElementById(name + '-number');
+      range.addEventListener('input', () => { number.value = range.value; updateMotion(); });
+      number.addEventListener('input', () => { if (number.value !== '' && number.validity.valid) range.value = number.value; updateMotion(); });
+    });
+    updateMotion();
+    const colorRows = [...document.querySelectorAll('.color-item')];
+    const colorCopy = document.getElementById('death-colors-copy');
+    const colorCommand = document.getElementById('death-colors-command');
+    function updateDeathColors() {
+      const preview = document.getElementById('death-preview-stage');
+      const previewVars = { ct:'--preview-ct', t:'--preview-t', background:'--preview-bg', backgroundLocal:'--preview-local', border:'--preview-border' };
+      colorRows.forEach(row => {
+        const hex = row.querySelector('input[type=color]').value;
+        const alpha = row.querySelector('input[type=range]');
+        row.querySelector('output').textContent = alpha.value;
+        if (alpha.value === '' || !alpha.validity.valid || !Number.isInteger(alpha.valueAsNumber)) return;
+        const rgb = [1, 3, 5].map(offset => parseInt(hex.slice(offset, offset + 2), 16));
+        preview.style.setProperty(previewVars[row.dataset.colorKey], `rgba(${rgb.join(', ')}, ${alpha.valueAsNumber / 255})`);
+      });
+      const valid = colorRows.every(row => {
+        const alpha = row.querySelector('input[type=range]');
+        return alpha.value !== '' && alpha.validity.valid && Number.isInteger(alpha.valueAsNumber);
+      });
+      colorCopy.disabled = !valid;
+      if (!valid) { colorCopy.dataset.command = ''; colorCommand.textContent = '请输入 0～255 的整数透明度'; return; }
+      const commands = colorRows.map(row => {
+        const hex = row.querySelector('input[type=color]').value;
+        const rgb = [1, 3, 5].map(offset => parseInt(hex.slice(offset, offset + 2), 16));
+        const alpha = row.querySelector('input[type=range]').valueAsNumber;
+        return `mirv_deathmsg colors ${row.dataset.colorKey} ${rgb.join(' ')} ${alpha}`;
+      });
+      colorCopy.dataset.command = commands.join('; ');
+      colorCommand.textContent = colorCopy.dataset.command;
+    }
+    colorRows.forEach(row => row.querySelectorAll('input').forEach(input => input.addEventListener('input', updateDeathColors)));
+    updateDeathColors();
+    const lifetimeRange = document.getElementById('lifetime-range');
+    const lifetimeNumber = document.getElementById('lifetime-number');
+    const lifetimeCopy = document.getElementById('lifetime-copy');
+    function updateLifetime() {
+      const valid = lifetimeNumber.value !== '' && lifetimeNumber.validity.valid && Number.isFinite(lifetimeNumber.valueAsNumber);
+      const command = valid ? `mirv_deathmsg lifetime ${lifetimeNumber.valueAsNumber}` : '';
+      lifetimeCopy.disabled = !valid;
+      lifetimeCopy.dataset.command = command;
+      document.getElementById('lifetime-command').textContent = command || '请输入 0～3600 秒的有效数值';
+      if (valid) lifetimeRange.value = Math.min(120, lifetimeNumber.valueAsNumber);
+    }
+    lifetimeRange.addEventListener('input', () => { lifetimeNumber.value = lifetimeRange.value; updateLifetime(); });
+    lifetimeNumber.addEventListener('input', updateLifetime);
+    const frameId = document.getElementById('frame-id');
+    const removeCopy = document.getElementById('remove-copy');
+    const removeCommand = document.getElementById('remove-command');
+    frameId.addEventListener('input', () => {
+      const valid = /^\d+$/.test(frameId.value) && frameId.validity.valid;
+      removeCopy.disabled = !valid;
+      removeCopy.dataset.command = valid ? `mirv_campath remove ${frameId.value}` : '';
+      removeCommand.textContent = valid ? removeCopy.dataset.command : 'mirv_campath remove <ID>';
+      removeCopy.querySelector('span').textContent = valid ? '复制命令' : '填写 ID 后复制';
+    });
+    const dofCopy = document.getElementById('dof-copy');
+    const dofCommand = document.getElementById('dof-command');
+    const dofError = document.getElementById('dof-error');
+    const dofMode = document.getElementById('dof-mode');
+    const dofStart = document.getElementById('dof-start');
+    const dofEnd = document.getElementById('dof-end');
+    const dofScale = document.getElementById('dof-scale');
+    const dofDiagram = document.getElementById('dof-diagram');
+    const dofStartHandle = document.getElementById('dof-start-handle');
+    const dofEndHandle = document.getElementById('dof-end-handle');
+    const blurRange = document.getElementById('blur-size-range');
+    const blurNumber = document.getElementById('blur-size-number');
+    let dofOn = true;
+    const validDofInput = input => input.value !== '' && input.validity.valid && Number.isFinite(input.valueAsNumber);
+    function updateDofPreview() {
+      const content = document.getElementById('dof-preview-content');
+      const message = document.getElementById('dof-preview-message');
+      const valid = validDofInput(dofStart) && validDofInput(dofEnd);
+      const ordered = valid && dofStart.valueAsNumber <= dofEnd.valueAsNumber;
+      content.hidden = !dofOn || !ordered;
+      message.hidden = dofOn && ordered;
+      if (!dofOn) { message.textContent = '当前选择关闭景深覆盖；游戏原生景深无法在此预览。'; return; }
+      if (!valid) { message.textContent = '请填写 0～8000 范围内的整数距离。'; return; }
+      if (!ordered) { message.textContent = '清晰起点不能大于终点，请调整距离。'; return; }
+      const start = dofStart.valueAsNumber, end = dofEnd.valueAsNumber;
+      if (end > Number(dofScale.value)) {
+        dofScale.value = [1000, 2000, 4000, 8000].find(value => value >= end);
+      }
+      const maximum = Number(dofScale.value);
+      const orange = '#e79b42', green = '#4caa74';
+      const gradient = document.getElementById('dof-gradient');
+      gradient.replaceChildren();
+      function addStop(distance, color) {
+        const stop = document.createElementNS('http://www.w3.org/2000/svg', 'stop');
+        stop.setAttribute('offset', String(distance / maximum));
+        stop.setAttribute('stop-color', color);
+        gradient.appendChild(stop);
+      }
+      addStop(0, start === 0 ? green : orange);
+      [[start - 1, orange], [start, green], [end, green], [end + 1, orange]].forEach(([distance, color]) => {
+        if (distance >= 0 && distance <= maximum) addStop(distance, color);
+      });
+      addStop(maximum, end === maximum ? green : orange);
+      function placeHandle(handle, value) {
+        const x = 70 + value / maximum * 500;
+        const half = Math.max(10, 51 * value / maximum);
+        const line = handle.querySelector('line');
+        line.setAttribute('x1', x); line.setAttribute('x2', x);
+        line.setAttribute('y1', 64 - half); line.setAttribute('y2', 64 + half);
+        handle.querySelectorAll('circle').forEach(circle => { circle.setAttribute('cx', x); circle.setAttribute('cy', 64); });
+        handle.setAttribute('aria-valuenow', value);
+        handle.setAttribute('aria-valuetext', `${value} 游戏单位`);
+      }
+      placeHandle(dofStartHandle, start); placeHandle(dofEndHandle, end);
+      dofStartHandle.setAttribute('aria-valuemax', end);
+      dofEndHandle.setAttribute('aria-valuemin', start);
+      dofEndHandle.setAttribute('aria-valuemax', maximum);
+      document.getElementById('dof-preview-max').textContent = `${maximum} 游戏单位 →`;
+    }
+    function updateDof() {
+      updateDofPreview();
+      if (!dofOn) {
+        const text = 'mirv_cvar_unhide_all; r_dof_override 0; r_dof2_maxblursize 5';
+        dofCopy.disabled = false; dofCopy.dataset.command = text; dofCommand.textContent = text;
+        dofError.textContent = ''; dofCopy.querySelector('span').textContent = '复制关闭命令'; return;
+      }
+      dofCopy.querySelector('span').textContent = '复制景深设置';
+      const valid = [dofStart, dofEnd, blurNumber].every(validDofInput) && dofStart.valueAsNumber <= dofEnd.valueAsNumber;
+      dofCopy.disabled = !valid;
+      if (!valid) { dofCopy.dataset.command = ''; dofCommand.textContent = '请填写有效的清晰范围和模糊上限'; dofError.textContent = '起点和终点须为 0～8000 的整数，起点不能大于终点。'; return; }
+      const start = dofStart.valueAsNumber, end = dofEnd.valueAsNumber;
+      const text = ['mirv_cvar_unhide_all', 'r_dof_override 1', `r_dof_override_near_blurry ${start - 1}`, `r_dof_override_near_crisp ${start}`, `r_dof_override_far_crisp ${end}`, `r_dof_override_far_blurry ${end + 1}`, `r_dof2_maxblursize ${blurNumber.valueAsNumber}`].join('; ');
+      dofError.textContent = ''; dofCommand.textContent = text; dofCopy.dataset.command = text;
+    }
+    dofMode.querySelectorAll('[data-mode]').forEach(button => button.addEventListener('click', () => {
+      dofOn = button.dataset.mode === 'on'; setModeButtons(dofMode, button.dataset.mode);
+      dofCopy.closest('.card').querySelector('.copy-status').textContent = ''; updateDof();
+    }));
+    [dofStart, dofEnd].forEach(input => input.addEventListener('input', updateDof));
+    dofScale.addEventListener('change', updateDof);
+    blurRange.addEventListener('input', () => { blurNumber.value = blurRange.value; updateDof(); });
+    blurNumber.addEventListener('input', () => { if (validDofInput(blurNumber)) blurRange.value = blurNumber.value; updateDof(); });
+    function pointerDistance(event) {
+      const rect = dofDiagram.getBoundingClientRect();
+      const x = (event.clientX - rect.left) / rect.width * 600;
+      return Math.max(0, Math.min(Number(dofScale.value), (x - 70) / 500 * Number(dofScale.value)));
+    }
+    let dofDrag = null;
+    dofDiagram.addEventListener('pointerdown', event => {
+      if (!dofOn || event.button !== 0 || !validDofInput(dofStart) || !validDofInput(dofEnd) || dofStart.valueAsNumber > dofEnd.valueAsNumber) return;
+      event.preventDefault();
+      const distance = pointerDistance(event), start = dofStart.valueAsNumber, end = dofEnd.valueAsNumber;
+      const handle = event.target.closest('[data-handle]')?.dataset.handle;
+      const within = distance > start && distance < end;
+      const mode = handle || (within ? 'move' : Math.abs(distance - start) <= Math.abs(distance - end) ? 'start' : 'end');
+      dofDrag = { pointerId:event.pointerId, mode, origin:distance, start, end };
+      dofDiagram.setPointerCapture(event.pointerId);
+      if (mode !== 'move') dragDof(event);
+    });
+    function dragDof(event) {
+      if (!dofDrag || event.pointerId !== dofDrag.pointerId) return;
+      const distance = pointerDistance(event), max = Number(dofScale.value);
+      if (dofDrag.mode === 'start') dofStart.value = Math.round(Math.min(distance, dofEnd.valueAsNumber));
+      else if (dofDrag.mode === 'end') dofEnd.value = Math.round(Math.max(distance, dofStart.valueAsNumber));
+      else {
+        const delta = Math.max(-dofDrag.start, Math.min(max - dofDrag.end, distance - dofDrag.origin));
+        dofStart.value = Math.round(dofDrag.start + delta); dofEnd.value = Math.round(dofDrag.end + delta);
+      }
+      updateDof();
+    }
+    dofDiagram.addEventListener('pointermove', dragDof);
+    dofDiagram.addEventListener('pointerup', event => { if (dofDrag && event.pointerId === dofDrag.pointerId) dofDrag = null; });
+    dofDiagram.addEventListener('pointercancel', () => { dofDrag = null; });
+    dofDiagram.addEventListener('lostpointercapture', () => { dofDrag = null; });
+    [dofStartHandle, dofEndHandle].forEach(handle => handle.addEventListener('keydown', event => {
+      if (!dofOn || !validDofInput(dofStart) || !validDofInput(dofEnd)) return;
+      const isStart = handle === dofStartHandle, field = isStart ? dofStart : dofEnd;
+      const min = isStart ? 0 : dofStart.valueAsNumber, max = isStart ? dofEnd.valueAsNumber : Number(dofScale.value);
+      let value = field.valueAsNumber;
+      if (event.key === 'ArrowLeft' || event.key === 'ArrowDown') value -= event.shiftKey ? 10 : 1;
+      else if (event.key === 'ArrowRight' || event.key === 'ArrowUp') value += event.shiftKey ? 10 : 1;
+      else if (event.key === 'Home') value = min;
+      else if (event.key === 'End') value = max;
+      else return;
+      event.preventDefault(); field.value = Math.min(max, Math.max(min, value)); updateDof();
+    }));
+    updateDof();
+    document.querySelectorAll('[data-command], #remove-copy').forEach(button => {
+      let timer;
+      const defaultLabel = button.querySelector('span')?.textContent || button.textContent;
+      button.addEventListener('click', async () => {
+        if (!button.dataset.command) return;
+        const copied = await copyText(button.dataset.command);
+        const status = button.closest('.card').querySelector('.copy-status');
+        const label = button.querySelector('span');
+        clearTimeout(timer);
+        if (label) label.textContent = copied ? '已复制' : '复制失败';
+        else button.textContent = copied ? '已复制查看命令' : '复制失败';
+        status.textContent = copied ? '已复制，可粘贴至控制台' : '复制失败，请手动选择命令复制';
+        timer = setTimeout(() => {
+          if (label) {
+            if (button === removeCopy) label.textContent = removeCopy.disabled ? '填写 ID 后复制' : '复制命令';
+            else if (button === selectFrameCopy) label.textContent = selectFrameCopy.disabled ? '填写 ID 后复制选择命令' : '复制选择命令';
+            else if (button === dofCopy) label.textContent = dofOn ? '复制景深设置' : '复制关闭命令';
+            else label.textContent = defaultLabel;
+          } else button.textContent = defaultLabel;
+          status.textContent = '';
+        }, 3000);
+      });
+    });
+  </script>
+</body>
+</html>
