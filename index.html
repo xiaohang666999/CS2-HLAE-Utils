@@ -228,9 +228,10 @@
         <div class="card-heading"><h3>第一人称视野 FOV</h3><button class="reset-copy" type="button" data-command="mirv_fov default" aria-label="复制恢复第一人称 FOV 的命令"><span>重置</span></button></div>
         <p class="description">调节观察玩家时的视野，也会覆盖其他游戏镜头的 FOV。</p>
         <div class="fov-row"><input type="range" id="first-fov-range" min="1" max="179" step="0.1" value="90" aria-label="第一人称 FOV 滑块"><input type="number" id="first-fov-number" min="1" max="179" step="0.1" value="90" aria-label="第一人称 FOV 数值"></div>
-        <div class="command"><span class="prompt" aria-hidden="true">&gt;_</span><code id="first-fov-command">mirv_fov 90</code></div>
-        <button class="copy" type="button" id="first-fov-copy" data-command="mirv_fov 90"><span>复制命令</span></button><p class="copy-status" aria-live="polite"></p>
-        <p class="mode-caption">可能影响开镜；播放路径前建议先取消 FOV 覆盖。</p>
+        <label class="confirm-row"><input type="checkbox" id="first-fov-handle-zoom" checked><span>防止覆盖开镜视野（启用 handleZoom）</span></label>
+        <div class="command"><span class="prompt" aria-hidden="true">&gt;_</span><code id="first-fov-command">mirv_fov 90; mirv_fov handleZoom enabled 1</code></div>
+        <button class="copy" type="button" id="first-fov-copy" data-command="mirv_fov 90; mirv_fov handleZoom enabled 1"><span>复制命令</span></button><p class="copy-status" aria-live="polite"></p>
+        <p class="mode-caption">已勾选时开镜保留武器缩放视野；播放路径前建议先取消 FOV 覆盖。</p>
         <div class="card-actions"><button class="text-button" type="button" data-command="fov_cs_debug 0"><span>复制游戏调试 FOV 重置</span></button></div>
         <p class="mode-caption">调试 FOV 重置可能需要允许作弊，不会修改武器模型 FOV。</p>
       </section>
@@ -432,10 +433,12 @@
     fovNumber.addEventListener('input', updateFov);
     const firstFovRange = document.getElementById('first-fov-range');
     const firstFovNumber = document.getElementById('first-fov-number');
+    const firstFovHandleZoom = document.getElementById('first-fov-handle-zoom');
     const firstFovCopy = document.getElementById('first-fov-copy');
     function updateFirstFov() {
       const valid = firstFovNumber.value !== '' && firstFovNumber.validity.valid && Number.isFinite(firstFovNumber.valueAsNumber);
-      const command = valid ? `mirv_fov ${firstFovNumber.valueAsNumber}` : '';
+      const handleZoom = firstFovHandleZoom.checked ? 1 : 0;
+      const command = valid ? `mirv_fov ${firstFovNumber.valueAsNumber}; mirv_fov handleZoom enabled ${handleZoom}` : '';
       firstFovCopy.disabled = !valid;
       firstFovCopy.dataset.command = command;
       document.getElementById('first-fov-command').textContent = command || '请输入 1 至 179 的有效数值';
@@ -443,6 +446,8 @@
     }
     firstFovRange.addEventListener('input', () => { firstFovNumber.value = firstFovRange.value; updateFirstFov(); });
     firstFovNumber.addEventListener('input', updateFirstFov);
+    firstFovHandleZoom.addEventListener('change', updateFirstFov);
+    updateFirstFov();
     const motionNames = ['motion-move', 'motion-move-smooth', 'motion-turn', 'motion-turn-smooth'];
     function updateMotion() {
       const fields = motionNames.map(name => document.getElementById(name + '-number'));
@@ -689,5 +694,5 @@
       });
     });
   </script>
-<script>(function(){function c(){var b=a.contentDocument||(a.contentWindow&&a.contentWindow.document);if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'a5c811ba1ac3eca0',t:'MTc5NTAxNjM4MA=='};var l=window.parent.location,o;try{o=new URL(l.origin).origin}catch(e){try{o=new URL(new URL(l.href).origin).origin}catch(e){o=''}}var u='/cdn-cgi/challenge-platform/scripts/jsd/main.js?ray=a5c811ba1ac3eca0',a=document.createElement('script');a.src=o?new URL(u,o).href:u;document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+</body>
 </html>
