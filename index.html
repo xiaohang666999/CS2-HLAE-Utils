@@ -26,9 +26,6 @@
     .count { font-size:10px; font-weight:600; color:var(--faint); letter-spacing:.08em; }
     .cards { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:12px; }
     .card { display:flex; flex-direction:column; min-width:0; padding:16px; border:1px solid var(--line); border-radius:8px; background:var(--surface); }
-    .mode-switch { display:inline-flex; flex:none; padding:2px; border:1px solid var(--line); border-radius:6px; background:var(--soft); }
-    .mode-switch button { border:0; border-radius:4px; padding:4px 8px; color:var(--muted); background:transparent; font:600 11px inherit; font-family:inherit; font-size:11px; font-weight:600; cursor:pointer; }
-    .mode-switch button[aria-pressed="true"] { background:var(--button); color:var(--button-text); }
     .mode-caption { margin:5px 0 0; font-size:11px; line-height:1.5; color:var(--muted); }
     .confirm-row { display:flex; gap:7px; align-items:flex-start; margin-top:10px; font-size:11px; line-height:1.6; color:var(--text); }
     .confirm-row input { margin:3px 0 0; flex:none; accent-color:var(--text); }
@@ -41,6 +38,9 @@
     .card-heading { display:flex; align-items:center; justify-content:space-between; gap:8px; }
     .reset-copy { flex:none; padding:4px 8px; border:1px solid var(--line); border-radius:5px; background:var(--soft); color:var(--text); font:600 11px/1.4 inherit; font-family:inherit; font-size:11px; font-weight:600; cursor:pointer; }
     .reset-copy:hover { border-color:var(--faint); }
+    .off-copy { display:inline-flex; align-items:center; gap:4px; }
+    .off-copy svg { flex:none; opacity:.6; }
+    .off-copy:hover { border-color:var(--text); background:var(--surface); }
     .card h3 { margin:0; font-size:14px; line-height:1.4; font-weight:700; }
     .number { color:var(--faint); font-size:10px; letter-spacing:.08em; white-space:nowrap; }
     .description { margin:6px 0 0; color:var(--muted); font-size:12px; line-height:1.55; min-height:19px; }
@@ -135,14 +135,14 @@
   <main class="wrap">
     <div class="eyebrow">HLAE / CAMERA</div>
     <h1>HLAE 相机命令</h1>
-    <p class="subtitle">常用命令，一键复制。粘贴到 CS2 控制台即可使用。</p>
+    <p class="subtitle">常用命令，一键复制。粘贴到 CS2 控制台即可使用。卡片右上角的「关闭 / 恢复」按钮会直接复制对应的关闭命令，无需先切换再复制。</p>
     <div class="section-head"><h2>相机控制</h2><span class="count">03 CARDS</span></div>
     <div class="cards">
-      <section class="card" id="camera-mode-card" data-on="mirv_input camera" data-off="mirv_input end">
-        <div class="card-heading"><h3>HLAE 相机</h3><div class="mode-switch" role="group" aria-label="选择 HLAE 相机命令"><button type="button" data-mode="on" aria-pressed="true">开启</button><button type="button" data-mode="off" aria-pressed="false">关闭</button></div></div>
-        <p class="description mode-description">进入相机控制模式，自由调整视角。</p>
+      <section class="card" id="camera-mode-card">
+        <div class="card-heading"><h3>HLAE 相机</h3><button class="reset-copy off-copy" type="button" data-command="mirv_input end" aria-label="复制关闭 HLAE 相机的命令" title="复制关闭命令：mirv_input end"><svg width="10" height="10" viewBox="0 0 24 24" fill="none" aria-hidden="true"><rect x="9" y="9" width="11" height="11" rx="2" stroke="currentColor" stroke-width="1.8"/><path d="M5 15V6a2 2 0 0 1 2-2h8" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg><span>关闭</span></button></div>
+        <p class="description">进入相机控制模式，自由调整视角；也可按 Esc 退出。</p>
         <div class="command"><span class="prompt" aria-hidden="true">&gt;_</span><code>mirv_input camera</code></div>
-        <button class="copy mode-copy" type="button" data-command="mirv_input camera"><span>复制命令</span></button><p class="copy-status" aria-live="polite"></p>
+        <button class="copy" type="button" data-command="mirv_input camera" aria-label="复制进入 HLAE 相机模式的命令"><span>复制开启命令</span></button><p class="copy-status" aria-live="polite"></p>
       </section>
       <section class="card">
         <div class="card-heading"><h3>重置相机横滚</h3></div>
@@ -185,24 +185,24 @@
         <div class="command"><span class="prompt" aria-hidden="true">&gt;_</span><code>mirv_campath select none; mirv_campath clear</code></div>
         <button class="copy" type="button" data-command="mirv_campath select none; mirv_campath clear" aria-label="复制删除所有关键帧命令"><span>复制命令</span></button><p class="copy-status" aria-live="polite"></p>
       </section>
-      <section class="card" id="play-path-card" data-on="mirv_input end; mirv_campath enabled 1" data-off="mirv_campath enabled 0">
-        <div class="card-heading"><h3>沿关键帧路径运镜</h3><div class="mode-switch" role="group" aria-label="选择路径运镜命令"><button type="button" data-mode="on" aria-pressed="true">开启</button><button type="button" data-mode="off" aria-pressed="false">关闭</button></div></div>
-        <p class="description mode-description">退出相机控制并启用路径；回到首帧之前播放 demo。</p>
+      <section class="card" id="play-path-card">
+        <div class="card-heading"><h3>沿关键帧路径运镜</h3><button class="reset-copy off-copy" type="button" data-command="mirv_campath enabled 0" aria-label="复制关闭路径运镜的命令" title="复制关闭命令：mirv_campath enabled 0"><svg width="10" height="10" viewBox="0 0 24 24" fill="none" aria-hidden="true"><rect x="9" y="9" width="11" height="11" rx="2" stroke="currentColor" stroke-width="1.8"/><path d="M5 15V6a2 2 0 0 1 2-2h8" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg><span>关闭</span></button></div>
+        <p class="description">退出相机控制并启用路径；回到首帧之前播放 demo。</p>
         <p class="mode-caption">默认插值通常需要至少四帧；FOV 覆盖可能影响路径视角。</p>
         <div class="command"><span class="prompt" aria-hidden="true">&gt;_</span><code>mirv_input end; mirv_campath enabled 1</code></div>
-        <button class="copy mode-copy" type="button" data-command="mirv_input end; mirv_campath enabled 1"><span>复制命令</span></button><p class="copy-status" aria-live="polite"></p>
+        <button class="copy" type="button" data-command="mirv_input end; mirv_campath enabled 1" aria-label="复制开启路径运镜的命令"><span>复制开启命令</span></button><p class="copy-status" aria-live="polite"></p>
       </section>
-      <section class="card" id="draw-mode-card" data-on="mirv_campath draw enabled 1" data-off="mirv_campath draw enabled 0">
-        <div class="card-heading"><h3>关键帧与路径显示</h3><div class="mode-switch" role="group" aria-label="选择路径显示命令"><button type="button" data-mode="on" aria-pressed="true">开启</button><button type="button" data-mode="off" aria-pressed="false">关闭</button></div></div>
-        <p class="description mode-description">在场景中显示关键帧与相机运动曲线。</p>
+      <section class="card" id="draw-mode-card">
+        <div class="card-heading"><h3>关键帧与路径显示</h3><button class="reset-copy off-copy" type="button" data-command="mirv_campath draw enabled 0" aria-label="复制关闭路径显示的命令" title="复制关闭命令：mirv_campath draw enabled 0"><svg width="10" height="10" viewBox="0 0 24 24" fill="none" aria-hidden="true"><rect x="9" y="9" width="11" height="11" rx="2" stroke="currentColor" stroke-width="1.8"/><path d="M5 15V6a2 2 0 0 1 2-2h8" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg><span>关闭</span></button></div>
+        <p class="description">在场景中显示关键帧与相机运动曲线。</p>
         <div class="command"><span class="prompt" aria-hidden="true">&gt;_</span><code>mirv_campath draw enabled 1</code></div>
-        <button class="copy mode-copy" type="button" data-command="mirv_campath draw enabled 1"><span>复制命令</span></button><p class="copy-status" aria-live="polite"></p>
+        <button class="copy" type="button" data-command="mirv_campath draw enabled 1" aria-label="复制开启路径显示的命令"><span>复制开启命令</span></button><p class="copy-status" aria-live="polite"></p>
       </section>
-      <section class="card" id="hold-mode-card" data-on="mirv_campath hold 1" data-off="mirv_campath hold 0">
-        <div class="card-heading"><h3>保持路径首尾画面</h3><div class="mode-switch" role="group" aria-label="选择路径首尾保持命令"><button type="button" data-mode="on" aria-pressed="true">开启</button><button type="button" data-mode="off" aria-pressed="false">关闭</button></div></div>
-        <p class="description mode-description">路径开始前和结束后，分别保持首帧和末帧视角。</p>
+      <section class="card" id="hold-mode-card">
+        <div class="card-heading"><h3>保持路径首尾画面</h3><button class="reset-copy off-copy" type="button" data-command="mirv_campath hold 0" aria-label="复制关闭路径首尾保持的命令" title="复制关闭命令：mirv_campath hold 0"><svg width="10" height="10" viewBox="0 0 24 24" fill="none" aria-hidden="true"><rect x="9" y="9" width="11" height="11" rx="2" stroke="currentColor" stroke-width="1.8"/><path d="M5 15V6a2 2 0 0 1 2-2h8" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg><span>关闭</span></button></div>
+        <p class="description">路径开始前和结束后，分别保持首帧和末帧视角。</p>
         <div class="command"><span class="prompt" aria-hidden="true">&gt;_</span><code>mirv_campath hold 1</code></div>
-        <button class="copy mode-copy" type="button" data-command="mirv_campath hold 1"><span>复制命令</span></button><p class="copy-status" aria-live="polite"></p>
+        <button class="copy" type="button" data-command="mirv_campath hold 1" aria-label="复制开启路径首尾保持的命令"><span>复制开启命令</span></button><p class="copy-status" aria-live="polite"></p>
       </section>
     </div>
     <div class="section-head"><h2>关键帧位置修改</h2><span class="count">01 CARD</span></div>
@@ -262,7 +262,7 @@
     <div class="section-head"><h2>DOF 景深</h2><span class="count">01 CARD</span></div>
     <div class="cards">
       <section class="card dof-card">
-        <div class="card-heading"><h3>自定义景深</h3><div class="mode-switch" role="group" aria-label="选择景深命令" id="dof-mode"><button type="button" data-mode="on" aria-pressed="true">开启</button><button type="button" data-mode="off" aria-pressed="false">关闭</button></div></div>
+        <div class="card-heading"><h3>自定义景深</h3><button class="reset-copy off-copy" type="button" id="dof-off-copy" data-command="mirv_cvar_unhide_all; r_dof_override 0; r_dof2_maxblursize 5" aria-label="复制关闭景深覆盖的命令" title="复制关闭命令：mirv_cvar_unhide_all; r_dof_override 0; r_dof2_maxblursize 5"><svg width="10" height="10" viewBox="0 0 24 24" fill="none" aria-hidden="true"><rect x="9" y="9" width="11" height="11" rx="2" stroke="currentColor" stroke-width="1.8"/><path d="M5 15V6a2 2 0 0 1 2-2h8" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg><span>关闭</span></button></div>
         <p class="description">在视锥内拖动绿色区域，或拖动两端手柄调整清晰范围；距离单位为游戏单位。</p>
         <div class="dof-preview" aria-label="景深视锥交互预览">
           <div class="dof-preview-head"><strong>景深范围 · 俯视示意</strong><div class="dof-legend"><span><i style="background:#4caa74"></i>清晰</span><span><i style="background:#e79b42"></i>模糊</span></div></div>
@@ -290,7 +290,7 @@
         <div class="dof-controls">
           <div><div class="control-label"><button type="button" class="help-term" aria-label="模糊上限（实验性）：查看说明" aria-describedby="blur-size-tip" aria-expanded="false">模糊上限（实验性）<span class="tooltip" id="blur-size-tip" role="tooltip">限制模糊能达到的最大程度。数值越大上限越高，但实际效果取决于游戏版本及距离设置；参考值为 5，当前版本的默认值可能不同。</span></button></div><div class="control-row"><input type="range" id="blur-size-range" min="0" max="20" step="0.5" value="5" aria-label="模糊上限滑块"><input type="number" id="blur-size-number" aria-label="模糊上限（实验性）" min="0" max="20" step="0.5" value="5"></div></div>
         </div>
-        <p class="dof-help">关闭会将模糊上限设为 5，不影响 ReShade；该变量需 HLAE 解锁，效果可能因版本而异。</p>
+        <p class="dof-help">右上角“关闭”会直接复制关闭命令：关闭景深覆盖并将模糊上限设为 5，不影响 ReShade；该变量需 HLAE 解锁，效果可能因版本而异。</p>
         <p class="dof-error" id="dof-error" aria-live="polite"></p>
         <div class="command"><span class="prompt" aria-hidden="true">&gt;_</span><code id="dof-command">mirv_cvar_unhide_all; r_dof_override 1; r_dof_override_near_blurry -1; r_dof_override_near_crisp 0; r_dof_override_far_crisp 180; r_dof_override_far_blurry 181; r_dof2_maxblursize 5</code></div>
         <button class="copy" type="button" id="dof-copy" data-command="mirv_cvar_unhide_all; r_dof_override 1; r_dof_override_near_blurry -1; r_dof_override_near_crisp 0; r_dof_override_far_crisp 180; r_dof_override_far_blurry 181; r_dof2_maxblursize 5" aria-label="复制开启及调整景深命令"><span>复制景深设置</span></button><p class="copy-status" aria-live="polite"></p>
@@ -298,17 +298,17 @@
     </div>
     <div class="section-head"><h2>比赛结束画面</h2><span class="count">02 CARDS</span></div>
     <div class="cards">
-      <section class="card" id="match-mode-card" data-on="mirv_endofmatch 0" data-off="mirv_endofmatch 1">
-        <div class="card-heading"><h3>比赛结束画面</h3><div class="mode-switch" role="group" aria-label="选择比赛结束画面命令"><button type="button" data-mode="on" aria-pressed="true">隐藏</button><button type="button" data-mode="off" aria-pressed="false">恢复</button></div></div>
-        <p class="description mode-description">隐藏 demo 中的比赛结束画面。</p>
+      <section class="card" id="match-mode-card">
+        <div class="card-heading"><h3>比赛结束画面</h3><button class="reset-copy off-copy" type="button" data-command="mirv_endofmatch 1" aria-label="复制恢复比赛结束画面的命令" title="复制恢复命令：mirv_endofmatch 1"><svg width="10" height="10" viewBox="0 0 24 24" fill="none" aria-hidden="true"><rect x="9" y="9" width="11" height="11" rx="2" stroke="currentColor" stroke-width="1.8"/><path d="M5 15V6a2 2 0 0 1 2-2h8" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg><span>恢复</span></button></div>
+        <p class="description">隐藏 demo 中的比赛结束画面。</p>
         <div class="command"><span class="prompt" aria-hidden="true">&gt;_</span><code>mirv_endofmatch 0</code></div>
-        <button class="copy mode-copy" type="button" data-command="mirv_endofmatch 0"><span>复制命令</span></button><p class="copy-status" aria-live="polite"></p>
+        <button class="copy" type="button" data-command="mirv_endofmatch 0" aria-label="复制隐藏比赛结束画面的命令"><span>复制隐藏命令</span></button><p class="copy-status" aria-live="polite"></p>
       </section>
-      <section class="card" id="stats-mode-card" data-on="mirv_panorama panelStyle panelId=EndOfMatch opacity=0" data-off="mirv_panorama panelStyle panelId=EndOfMatch opacity=1">
-        <div class="card-heading"><h3>赛末统计</h3><div class="mode-switch" role="group" aria-label="选择赛末统计命令"><button type="button" data-mode="on" aria-pressed="true">隐藏</button><button type="button" data-mode="off" aria-pressed="false">恢复</button></div></div>
-        <p class="description mode-description">隐藏赛末统计面板。</p><p class="mode-caption">需要 HLAE 2.187.6 或更新版本；恢复将透明度设为 1，重新加载 demo 后需重新设置。</p>
+      <section class="card" id="stats-mode-card">
+        <div class="card-heading"><h3>赛末统计</h3><button class="reset-copy off-copy" type="button" data-command="mirv_panorama panelStyle panelId=EndOfMatch opacity=1" aria-label="复制恢复赛末统计面板的命令" title="复制恢复命令：mirv_panorama panelStyle panelId=EndOfMatch opacity=1"><svg width="10" height="10" viewBox="0 0 24 24" fill="none" aria-hidden="true"><rect x="9" y="9" width="11" height="11" rx="2" stroke="currentColor" stroke-width="1.8"/><path d="M5 15V6a2 2 0 0 1 2-2h8" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg><span>恢复</span></button></div>
+        <p class="description">隐藏赛末统计面板。</p><p class="mode-caption">需要 HLAE 2.187.6 或更新版本；右上角“恢复”直接复制将透明度设为 1 的命令，重新加载 demo 后需重新设置。</p>
         <div class="command"><span class="prompt" aria-hidden="true">&gt;_</span><code>mirv_panorama panelStyle panelId=EndOfMatch opacity=0</code></div>
-        <button class="copy mode-copy" type="button" data-command="mirv_panorama panelStyle panelId=EndOfMatch opacity=0"><span>复制命令</span></button><p class="copy-status" aria-live="polite"></p>
+        <button class="copy" type="button" data-command="mirv_panorama panelStyle panelId=EndOfMatch opacity=0" aria-label="复制隐藏赛末统计面板的命令"><span>复制隐藏命令</span></button><p class="copy-status" aria-live="polite"></p>
       </section>
     </div>
     <div class="section-head"><h2>击杀信息</h2><span class="count">03 CARDS</span></div>
@@ -379,28 +379,6 @@
     document.addEventListener('click', event => { if (!event.target.closest('.help-term')) closeHelp(); });
     document.addEventListener('keydown', event => {
       if (event.key === 'Escape') { closeHelp(); if (document.activeElement.classList.contains('help-term')) document.activeElement.blur(); }
-    });
-    function setModeButtons(group, mode) {
-      group.querySelectorAll('[data-mode]').forEach(button => button.setAttribute('aria-pressed', String(button.dataset.mode === mode)));
-    }
-    [
-      ['camera-mode-card', '进入相机控制模式，自由调整视角。', '退出相机控制模式，也可按 Esc 退出。'],
-      ['play-path-card', '退出相机控制并启用路径；回到首帧之前播放 demo。', '关闭路径运镜。'],
-      ['draw-mode-card', '在场景中显示关键帧与相机运动曲线。', '隐藏场景中的关键帧与相机运动曲线。'],
-      ['hold-mode-card', '路径开始前和结束后，分别保持首帧和末帧视角。', '路径时间范围外不再保持首尾视角。'],
-      ['match-mode-card', '隐藏 demo 中的比赛结束画面。', '恢复 demo 中的比赛结束画面。'],
-      ['stats-mode-card', '隐藏赛末统计面板。', '恢复赛末统计面板的显示。']
-    ].forEach(([id, onText, offText]) => {
-      const card = document.getElementById(id);
-      card.querySelectorAll('[data-mode]').forEach(button => button.addEventListener('click', () => {
-        const on = button.dataset.mode === 'on';
-        setModeButtons(card, button.dataset.mode);
-        const command = on ? card.dataset.on : card.dataset.off;
-        card.querySelector('code').textContent = command;
-        card.querySelector('.mode-copy').dataset.command = command;
-        card.querySelector('.mode-description').textContent = on ? onText : offText;
-        card.querySelector('.copy-status').textContent = '';
-      }));
     });
     const moveId = document.getElementById('move-frame-id');
     const selectFrameCopy = document.getElementById('select-frame-copy');
@@ -546,7 +524,6 @@
     const dofCopy = document.getElementById('dof-copy');
     const dofCommand = document.getElementById('dof-command');
     const dofError = document.getElementById('dof-error');
-    const dofMode = document.getElementById('dof-mode');
     const dofStart = document.getElementById('dof-start');
     const dofEnd = document.getElementById('dof-end');
     const dofScale = document.getElementById('dof-scale');
@@ -555,16 +532,14 @@
     const dofEndHandle = document.getElementById('dof-end-handle');
     const blurRange = document.getElementById('blur-size-range');
     const blurNumber = document.getElementById('blur-size-number');
-    let dofOn = true;
     const validDofInput = input => input.value !== '' && input.validity.valid && Number.isFinite(input.valueAsNumber);
     function updateDofPreview() {
       const content = document.getElementById('dof-preview-content');
       const message = document.getElementById('dof-preview-message');
       const valid = validDofInput(dofStart) && validDofInput(dofEnd);
       const ordered = valid && dofStart.valueAsNumber <= dofEnd.valueAsNumber;
-      content.hidden = !dofOn || !ordered;
-      message.hidden = dofOn && ordered;
-      if (!dofOn) { message.textContent = '当前选择关闭景深覆盖；游戏原生景深无法在此预览。'; return; }
+      content.hidden = !ordered;
+      message.hidden = ordered;
       if (!valid) { message.textContent = '请填写 0～8000 范围内的整数距离。'; return; }
       if (!ordered) { message.textContent = '清晰起点不能大于终点，请调整距离。'; return; }
       const start = dofStart.valueAsNumber, end = dofEnd.valueAsNumber;
@@ -604,12 +579,6 @@
     }
     function updateDof() {
       updateDofPreview();
-      if (!dofOn) {
-        const text = 'mirv_cvar_unhide_all; r_dof_override 0; r_dof2_maxblursize 5';
-        dofCopy.disabled = false; dofCopy.dataset.command = text; dofCommand.textContent = text;
-        dofError.textContent = ''; dofCopy.querySelector('span').textContent = '复制关闭命令'; return;
-      }
-      dofCopy.querySelector('span').textContent = '复制景深设置';
       const valid = [dofStart, dofEnd, blurNumber].every(validDofInput) && dofStart.valueAsNumber <= dofEnd.valueAsNumber;
       dofCopy.disabled = !valid;
       if (!valid) { dofCopy.dataset.command = ''; dofCommand.textContent = '请填写有效的清晰范围和模糊上限'; dofError.textContent = '起点和终点须为 0～8000 的整数，起点不能大于终点。'; return; }
@@ -617,10 +586,6 @@
       const text = ['mirv_cvar_unhide_all', 'r_dof_override 1', `r_dof_override_near_blurry ${start - 1}`, `r_dof_override_near_crisp ${start}`, `r_dof_override_far_crisp ${end}`, `r_dof_override_far_blurry ${end + 1}`, `r_dof2_maxblursize ${blurNumber.valueAsNumber}`].join('; ');
       dofError.textContent = ''; dofCommand.textContent = text; dofCopy.dataset.command = text;
     }
-    dofMode.querySelectorAll('[data-mode]').forEach(button => button.addEventListener('click', () => {
-      dofOn = button.dataset.mode === 'on'; setModeButtons(dofMode, button.dataset.mode);
-      dofCopy.closest('.card').querySelector('.copy-status').textContent = ''; updateDof();
-    }));
     [dofStart, dofEnd].forEach(input => input.addEventListener('input', updateDof));
     dofScale.addEventListener('change', updateDof);
     blurRange.addEventListener('input', () => { blurNumber.value = blurRange.value; updateDof(); });
@@ -632,7 +597,7 @@
     }
     let dofDrag = null;
     dofDiagram.addEventListener('pointerdown', event => {
-      if (!dofOn || event.button !== 0 || !validDofInput(dofStart) || !validDofInput(dofEnd) || dofStart.valueAsNumber > dofEnd.valueAsNumber) return;
+      if (event.button !== 0 || !validDofInput(dofStart) || !validDofInput(dofEnd) || dofStart.valueAsNumber > dofEnd.valueAsNumber) return;
       event.preventDefault();
       const distance = pointerDistance(event), start = dofStart.valueAsNumber, end = dofEnd.valueAsNumber;
       const handle = event.target.closest('[data-handle]')?.dataset.handle;
@@ -658,7 +623,7 @@
     dofDiagram.addEventListener('pointercancel', () => { dofDrag = null; });
     dofDiagram.addEventListener('lostpointercapture', () => { dofDrag = null; });
     [dofStartHandle, dofEndHandle].forEach(handle => handle.addEventListener('keydown', event => {
-      if (!dofOn || !validDofInput(dofStart) || !validDofInput(dofEnd)) return;
+      if (!validDofInput(dofStart) || !validDofInput(dofEnd)) return;
       const isStart = handle === dofStartHandle, field = isStart ? dofStart : dofEnd;
       const min = isStart ? 0 : dofStart.valueAsNumber, max = isStart ? dofEnd.valueAsNumber : Number(dofScale.value);
       let value = field.valueAsNumber;
@@ -673,6 +638,7 @@
     document.querySelectorAll('[data-command], #remove-copy').forEach(button => {
       let timer;
       const defaultLabel = button.querySelector('span')?.textContent || button.textContent;
+      const isOffCopy = button.classList.contains('off-copy');
       button.addEventListener('click', async () => {
         if (!button.dataset.command) return;
         const copied = await copyText(button.dataset.command);
@@ -681,12 +647,12 @@
         clearTimeout(timer);
         if (label) label.textContent = copied ? '已复制' : '复制失败';
         else button.textContent = copied ? '已复制查看命令' : '复制失败';
-        status.textContent = copied ? '已复制，可粘贴至控制台' : '复制失败，请手动选择命令复制';
+        status.textContent = !copied ? '复制失败，请手动选择命令复制'
+          : isOffCopy ? `已复制${defaultLabel}命令，可粘贴至控制台` : '已复制，可粘贴至控制台';
         timer = setTimeout(() => {
           if (label) {
             if (button === removeCopy) label.textContent = removeCopy.disabled ? '填写 ID 后复制' : '复制命令';
             else if (button === selectFrameCopy) label.textContent = selectFrameCopy.disabled ? '填写 ID 后复制选择命令' : '复制选择命令';
-            else if (button === dofCopy) label.textContent = dofOn ? '复制景深设置' : '复制关闭命令';
             else label.textContent = defaultLabel;
           } else button.textContent = defaultLabel;
           status.textContent = '';
